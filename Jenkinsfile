@@ -1,9 +1,6 @@
 pipeline
 {
     agent any
-    environment {
-        dockerimage = '$Docker_Username/webapp'
-    }
     stages
     {
         stage('code checkout') {
@@ -17,28 +14,24 @@ pipeline
                 echo ' build complete'
             }
         }
-        stage('docker build and push') {
+        stage('application deploy') {
             steps{
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockercred', usernameVariable: 'Docker_Username', passwordVariable: 'Docker_Password')]) 
+                    withCredentials([usernamePassword(credentialsId: 'dockercred', usernameVariable: 'docker_username', passwordVariable: 'docker_password')]) 
                     {
-                        sh 'echo $Docker_Password | docker login -u $Docker_Username --password-stdin' 
+                        sh 'echo $docker_password | docker login -u $docker_username --password-stdin' 
                         echo 'Login Successfull'
                         sh 'docker build -t webapp .'
                         echo ' Build successfull'
-                        sh 'docker tag webapp $Docker_Username/webapp'
-                        echo 'image tagged as $Docker_Username/webapp'
-                        sh 'docker push $Docker_Username/webapp'
+                        sh "docker tag webapp $docker_username/webapp"
+                        echo 'image tagged as $docker_username/webapp'
+                        sh "docker push $docker_username/webapp"
                         echo ' image pushed to dockerhub'
+                        sh "docker run -p 3000:8080 -d $docker_username/webapp"
+                        echo ' application deployed successfully'
                     }
             }
         }
     }
-        stage('app deploy') {
-            steps {
-                 sh 'docker run -p 3000:8080 -d ${dockerimage}'
-                 echo ' application deployed successfully'
-            }
-        }
 }
 }
