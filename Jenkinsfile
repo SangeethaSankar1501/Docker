@@ -17,17 +17,17 @@ pipeline
         stage('application deploy') {
             steps{
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockercred', usernameVariable: 'docker_username', passwordVariable: 'docker_password')]) 
+                    withCredentials([usernamePassword(credentialsId: 'awscred', usernameVariable: 'aws_access_key_id', passwordVariable: 'aws_secret_key_id')]) 
                     {
-                        sh 'echo $docker_password | docker login -u $docker_username --password-stdin' 
+                        sh 'aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 590183905103.dkr.ecr.us-east-2.amazonaws.com' 
                         echo 'Login Successfull'
-                        sh 'docker build -t webapp .'
+                        sh 'docker build -t testrepo .'
                         echo ' Build successfull'
-                        sh "docker tag webapp $docker_username/webapp"
-                        echo 'image tagged as $docker_username/webapp'
-                        sh "docker push $docker_username/webapp"
+                        sh "docker tag testrepo:latest 590183905103.dkr.ecr.us-east-2.amazonaws.com/testrepo:latest"
+                        echo 'image tagged as 590183905103.dkr.ecr.us-east-2.amazonaws.com/testrepo:latest'
+                        sh "docker push 590183905103.dkr.ecr.us-east-2.amazonaws.com/testrepo:latest"
                         echo ' image pushed to dockerhub'
-                        sh "docker run -p 3000:8080 -d $docker_username/webapp"
+                        sh "docker run -p 3000:8080 -d 590183905103.dkr.ecr.us-east-2.amazonaws.com/testrepo:latest"
                         echo ' application deployed successfully'
                     }
             }
