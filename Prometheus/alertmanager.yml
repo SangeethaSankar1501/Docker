@@ -1,0 +1,14 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  group_by: ['alertname']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 3h
+  receiver: 'null_receiver'  # Set a dummy receiver here as we have not set any SMTP 
+
+receivers:
+  - name: 'null_receiver'  # Dummy receiver that does nothing
+    webhook_configs:
+      - url: 'http://127.0.0.1:9999'  # A non-existent endpoint
